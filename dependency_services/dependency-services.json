@@ -1,0 +1,13 @@
+{
+  "packageManagers": [
+    {
+      "name": "pub",
+      "command": [
+        "/path/to/dart-sdk",
+        "dart",
+        "pub",
+        "__dependency-services"
+      ]
+    }
+  ]
+}

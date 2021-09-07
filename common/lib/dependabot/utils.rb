@@ -7,7 +7,7 @@ require "set"
 module Dependabot
   module Utils
     BUMP_TMP_FILE_PREFIX = "dependabot_"
-    BUMP_TMP_DIR_PATH = "tmp"
+    BUMP_TMP_DIR_PATH = "/tmp"
 
     @version_classes = {}
 
