@@ -232,8 +232,10 @@ ENV PUB_CACHE=/opt/dart/pub-cache \
   PATH="${PATH}:/opt/dart/dart-sdk/bin"
 ARG DART_VERSION=2.14.2
 RUN curl --connect-timeout 15 --retry 5 "https://storage.googleapis.com/dart-archive/channels/stable/release/${DART_VERSION}/sdk/dartsdk-linux-x64-release.zip" > "/tmp/dart-sdk.zip" \
-  && mkdir -p "/opt/dart/pub-cache" \
+  && mkdir -p "$PUB_CACHE" \
+  && chown dependabot:dependabot "$PUB_CACHE" \
   && unzip "/tmp/dart-sdk.zip" -d "/opt/dart" > /dev/null \
+  && chmod -R o+rx "/opt/dart/dart-sdk" \
   && rm "/tmp/dart-sdk.zip" \
   && dart --version
 # HACK: We use a patched version of "dart pub" that is not in the Dart SDK yet.
@@ -241,7 +243,9 @@ RUN curl --connect-timeout 15 --retry 5 "https://storage.googleapis.com/dart-arc
 #       Now it can be used with: 'dart pub global run pub ...'
 RUN git clone https://github.com/dart-lang/pub.git /opt/dart/pub \
   && git -C /opt/dart/pub checkout dependency_services \
-  && dart pub global activate --source path /opt/dart/pub
+  && dart pub global activate --source path /opt/dart/pub \
+  && chmod -R o+r "/opt/dart/pub" \
+  && chown -R dependabot:dependabot "$PUB_CACHE"
 
 
 USER root
