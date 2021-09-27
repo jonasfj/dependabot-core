@@ -10,7 +10,7 @@ require "dependabot/pub/requirement"
 module Dependabot
   module Pub
     module Helpers
-      def run_dependency_services(command, args = [])
+      def run_dependency_services(command, dependency_changes: nil)
         SharedHelpers.in_a_temporary_directory do
           dependency_files.each do |f|
             File.write(f.name, f.content)
@@ -20,20 +20,26 @@ module Dependabot
               {
                 "CI" => "true",
                 "PUB_ENVIRONMENT" => "dependabot",
-                "FLUTTER_ROOT" => nil # TODO: Configure FLUTTE_ROOT for all packages
+                "FLUTTER_ROOT" => nil # TODO: Configure FLUTTER_ROOT for all packages
               },
               [
                 "dart",
                 "pub",
-                "__dependency_service",
+                "global",
+                "run",
+                "pub",
+                "__experimental-dependency-services",
                 command,
                 *args
-              ]
+              ],
+              stdin_data: dependencies_to_json(dependency_changes)
             )
             raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
 
-            updated_files = dependency_files.each do |f|
-              updated_file(f, File.read(f.name))
+            updated_files = dependency_files.map do |f|
+              updated_file = f.dup
+              updated_file.content = File.read(f.name)
+              updated_file
             end
             return updated_files, JSON.parse(stdout)["dependencies"]
           end
@@ -53,10 +59,10 @@ module Dependabot
             requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
             groups: [json["kind"]],
             source: nil, # TODO: Expose some information about the source
-            file: "pubspec.yaml"
+            file: "pubspec.yaml" # TODO: Figure out how to handle mono-repos
           }
         end
-        if json["previous"]
+        if json["previousVersion"]
           params = {
             **params,
             previous_version: Dependabot::Pub::Version.new(json["previous"]),
@@ -68,11 +74,29 @@ module Dependabot
               requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
               groups: [json["kind"]],
               source: nil, # TODO: Expose some information about the source
-              file: "pubspec.yaml" # TODO: Figure out how to handle mono-repos
+              file: "pubspec.yaml"
             }
           end
         end
         Dependency.new(**params)
+      end
+
+      def self.dependencies_to_json(dependencies)
+        if dependencies.nil?
+          nil
+        else
+          deps = dependencies.map do |d|
+            obj = {
+              "name" => d.name,
+              "version" => d.version
+            }
+            obj["constraint"] = d.requirements[0].requirement.to_s if d.requirements.notEmpty?
+            obj
+          end
+          JSON.generate({
+            "dependencyChanges" => deps
+          })
+        end
       end
     end
   end

@@ -73,7 +73,6 @@ module Dependabot
       def convert_tilde_req(req_string)
         version = req_string.gsub(/^~/, "")
         parts = version.split(".")
-        parts << "0" if parts.count < 3
         "~> #{parts.join('.')}"
       end
 
