@@ -13,7 +13,7 @@ module Dependabot
       def parse
         dependency_set = DependencySet.new
         list.map do |d|
-          dependency_set << to_dependency(d)
+          dependency_set << Dependabot::Pub::Helpers.to_dependency(d)
         end
         dependency_set
       end
