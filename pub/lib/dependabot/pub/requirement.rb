@@ -45,7 +45,6 @@ module Dependabot
             convert_dart_constraint_to_ruby_constraint(r.strip)
           end
         end
-
         super(requirements)
 
         @raw_constraint = raw_constraint
@@ -62,7 +61,7 @@ module Dependabot
       private
 
       def convert_dart_constraint_to_ruby_constraint(req_string)
-        if req_string.empty? then ">= 0"
+        if req_string.empty? or req_string == 'any' then ">= 0"
         elsif req_string.match?(/^~[^>]/) then convert_tilde_req(req_string)
         elsif req_string.match?(/^\^/) then convert_caret_req(req_string)
         elsif req_string.match?(/[<=>]/) then req_string
