@@ -22,7 +22,7 @@ module Dependabot
       def fetch_files
         fetched_files = []
         fetched_files << pubspec_yaml
-        fetched_files << pubspec_lock if cargo_lock
+        fetched_files << pubspec_lock if pubspec_lock
         fetched_files.uniq
       end
 

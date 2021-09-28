@@ -45,4 +45,4 @@ module Dependabot
   end
 end
 
-Dependabot::Utils.register_version_class("pub", Dependabot::Cargo::Version)
+Dependabot::Utils.register_version_class("pub", Dependabot::Pub::Version)
