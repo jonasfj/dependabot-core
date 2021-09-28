@@ -2,6 +2,7 @@
 
 require "json"
 require "open3"
+require "digest"
 
 require "dependabot/errors"
 require "dependabot/shared_helpers"
@@ -42,6 +43,23 @@ module Dependabot
             return updated_files, JSON.parse(stdout)["dependencies"]
           end
         end
+      end
+
+      def run_dependency_services_report
+        sha256 = Digest::SHA256.new
+        dependency_files.each do |f|
+          sha256 << f.path + "\n" + f.content + "\n"
+        end
+        hash = sha256.hexdigest
+
+        cache_file = "/tmp/report-#{hash}-pid-#{Process.pid}.json"
+        if File.file?(cache_file)
+          return JSON.parse(File.read(cache_file))
+        end
+        
+        report = run_dependency_services("report")[1]
+        File.write(cache_file, JSON.generate(report))
+        report
       end
 
       def to_dependency(json)
