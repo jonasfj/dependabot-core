@@ -69,7 +69,7 @@ module Dependabot
           package_manager: "pub",
           requirements: []
         }
-        if json["kind"] != "transitive"
+        if json["kind"] != "transitive" && json["constraint"] != nil
           constraint = json["constraint"]
           params[:requirements] << {
             requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
@@ -84,7 +84,7 @@ module Dependabot
             previous_version: Dependabot::Pub::Version.new(json["previous"]),
             previous_requirements: []
           }
-          if json["kind"] != "transitive"
+          if json["kind"] != "transitive" && json["previousConstraint"] != nil
             constraint = json["previousConstraint"]
             params[:previous_requirements] << {
               requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),

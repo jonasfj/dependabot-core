@@ -12,6 +12,10 @@ module Dependabot
         ]
       end
 
+      def check_required_files
+        raise "No pubspec.yaml!" unless get_original_file("pubspec.yaml")
+      end
+
       def updated_dependency_files
         changes = @dependencies.map { |d| "#{d.name}:#{d.version}" }
         run_dependency_services("apply", changes)[0]
