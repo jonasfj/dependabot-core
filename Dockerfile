@@ -245,7 +245,8 @@ RUN git clone https://github.com/dart-lang/pub.git /opt/dart/pub \
   && git -C /opt/dart/pub checkout dependency_services \
   && dart pub global activate --source path /opt/dart/pub \
   && chmod -R o+r "/opt/dart/pub" \
-  && chown -R dependabot:dependabot "$PUB_CACHE"
+  && chown -R dependabot:dependabot "$PUB_CACHE" \
+  && chown -R dependabot:dependabot /opt/dart/pub
 
 
 USER root
