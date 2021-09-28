@@ -17,8 +17,7 @@ module Dependabot
       end
 
       def updated_dependency_files
-        changes = @dependencies.map { |d| "#{d.name}:#{d.version}" }
-        run_dependency_services("apply", changes)[0]
+        run_dependency_services("apply", dependency_changes: @dependencies)[0]
       end
     end
   end

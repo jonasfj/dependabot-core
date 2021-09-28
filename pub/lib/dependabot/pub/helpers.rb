@@ -106,7 +106,9 @@ module Dependabot
               "name" => d.name,
               "version" => d.version
             }
-            obj["constraint"] = d.requirements[0].requirement.to_s if d.requirements.notEmpty?
+            if !d.requirements.nil? && d.requirements.length > 1
+              obj["constraint"] = d.requirements[0].requirement.to_s
+            end
             obj
           end
           JSON.generate({
