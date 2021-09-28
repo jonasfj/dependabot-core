@@ -15,7 +15,7 @@ module Dependabot
         list.map do |d|
           dependency_set << to_dependency(d)
         end
-        dependency_set
+        dependency_set.dependencies.sort_by(&:name)
       end
 
       def check_required_files
