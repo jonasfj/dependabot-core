@@ -39,7 +39,7 @@ module Dependabot
         [new(requirement_string)]
       end
 
-      def initialize(*requirements, raw_constraint:)
+      def initialize(*requirements, raw_constraint: nil)
         requirements = requirements.flatten.flat_map do |req_string|
           req_string.split(",").map(&:strip).map do |r|
             convert_dart_constraint_to_ruby_constraint(r.strip)
