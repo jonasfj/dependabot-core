@@ -22,18 +22,14 @@ module Dependabot
                 "PUB_ENVIRONMENT" => "dependabot",
                 "FLUTTER_ROOT" => nil # TODO: Configure FLUTTER_ROOT for all packages
               },
-              "dart pub global run pub __experimental-dependency-services #{command}",
-
-          #     [
-          #       "dart",
-          #       "pub",
-          #       "global",
-          #       "run",
-          #       "pub",
-          #       "__experimental-dependency-services",
-          #  #     command,
-          #     #  *args
-          #     ],
+                "dart",
+                "pub",
+                "global",
+                "run",
+                "pub",
+                "__experimental-dependency-services",
+                command,
+                *args,
               stdin_data: dependencies_to_json(dependency_changes)
             )
             raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
