@@ -32,7 +32,7 @@ module Dependabot
         entry = current_report["single-breaking"].find { |d| d["name"] == dependency.name }
         return unless entry
 
-        Dependabot::Pub::Helpers.to_dependency(entry).requirements
+        to_dependency(entry).requirements
       end
 
       def latest_version_resolvable_with_full_unlock?
@@ -48,14 +48,14 @@ module Dependabot
           d["kind"] == "transitive"
         end
         direct_deps.map do |d|
-          Dependabot::Pub::Helpers.to_dependency(d)
+          to_dependency(d)
         end
       end
 
       private
 
       def report
-        @report ||= run_dependency_services("report")[1]
+        @report ||= run_dependency_services_report
       end
 
       def current_report
