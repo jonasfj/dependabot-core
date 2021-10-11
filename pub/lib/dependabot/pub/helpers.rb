@@ -14,6 +14,7 @@ module Dependabot
       def run_dependency_services(command, args = [], dependency_changes: nil)
         SharedHelpers.in_a_temporary_directory do
           dependency_files.each do |f|
+            FileUtils.mkdir_p File.dirname(f.name)
             File.write(f.name, f.content)
           end
           SharedHelpers.with_git_configured(credentials: credentials) do
