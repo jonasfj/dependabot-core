@@ -31,7 +31,7 @@ module Dependabot
       end
 
       def pubspec_lock
-        @pubspec_lock ||= fetch_file_from_host("pubspec.lock")
+        @pubspec_lock ||= fetch_file_if_present("pubspec.lock")
       end
     end
   end
