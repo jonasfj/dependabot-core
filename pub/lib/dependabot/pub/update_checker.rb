@@ -16,14 +16,30 @@ module Dependabot
         # Version we can get if we're not allowed to change pubspec.yaml, but we
         # allow changes in the pubspec.lock file.
         entry = current_report["compatible"].find { |d| d["name"] == dependency.name }
-        Dependabot::Pub::Version.new(entry["version"]) if entry
+        return nil unless entry
+
+        new_version = Dependabot::Pub::Version.new(entry["version"])
+        # We ignore this solution, if any of the requirements in
+        # ignored_versions satisfy the version we're proposing as an upgrade
+        # target.
+        return nil if ignore_requirements.any? { |r| r.satisfied_by(new_version) }
+
+        new_version
       end
 
       def latest_resolvable_version
         # Latest version we can get if we're allowed to unlock the current
         # package in pubspec.yaml
         entry = current_report["single-breaking"].find { |d| d["name"] == dependency.name }
-        Dependabot::Pub::Version.new(entry["version"]) if entry
+        return nil unless entry
+
+        new_version = Dependabot::Pub::Version.new(entry["version"])
+        # We ignore this solution, if any of the requirements in
+        # ignored_versions satisfy the version we're proposing as an upgrade
+        # target.
+        return nil if ignore_requirements.any? { |r| r.satisfied_by(new_version) }
+
+        new_version
       end
 
       def updated_requirements
