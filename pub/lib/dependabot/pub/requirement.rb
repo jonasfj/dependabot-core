@@ -61,11 +61,12 @@ module Dependabot
       private
 
       def convert_dart_constraint_to_ruby_constraint(req_string)
-        if req_string.empty? or req_string == 'any' then ">= 0"
+        if req_string.empty? or req_string == "any" then ">= 0"
         elsif req_string.match?(/^~[^>]/) then convert_tilde_req(req_string)
         elsif req_string.match?(/^\^/) then convert_caret_req(req_string)
-        elsif req_string.match?(/[<=>]/) then req_string
-        else ruby_range(req_string)
+        elsif req_string.match?(/[<=>]/) then convert_range_req(req_string)
+        else
+          ruby_range(req_string)
         end
       end
 
@@ -73,6 +74,19 @@ module Dependabot
         version = req_string.gsub(/^~/, "")
         parts = version.split(".")
         "~> #{parts.join('.')}"
+      end
+
+      def convert_range_req(req_string)
+        reqs = req_string.scan(
+          /
+            (?:>|<|=|<=|>=) # comparison operator
+            (?:\d+)\.(?:\d+)\.(?:\d+) # Version number.
+            (?:-(?:[0-9A-Za-z-]+(?:\.[?:0-9A-Za-z-]+)*))? # Pre-release.
+            (?:\+(?:[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))? # Build.
+            \s* # trailing whitespace
+          /x
+        ).map!(&:strip!)
+        reqs
       end
 
       def ruby_range(req_string)
