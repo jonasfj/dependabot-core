@@ -248,6 +248,13 @@ RUN git clone https://github.com/dart-lang/pub.git /opt/dart/pub \
   && chown -R dependabot:dependabot "$PUB_CACHE" \
   && chown -R dependabot:dependabot /opt/dart/pub
 
+# Install Flutter
+ARG FLUTTER_VERSION=2.5.3
+RUN curl --connect-timeout 15 --retry 5 "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" > "/tmp/flutter.xz" \
+  && tar xf "/tmp/flutter.xz" -C /opt/dart \
+  && chmod -R o+rx "/opt/dart/flutter" \
+  && chown -R dependabot:dependabot "/opt/dart/flutter" \
+  && runuser -l dependabot -c "/opt/dart/flutter/bin/flutter --version"
 
 USER root
 
