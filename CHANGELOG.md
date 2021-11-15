@@ -1,5 +1,28 @@
-## v0.163.1, 14 October 2021
+## v0.166.1, 12 November 2021
 
+- Terraform: Improve file updater and registry request error handling [#4405](https://github.com/dependabot/dependabot-core/pull/4405)
+- Explicitly ignore metadata detection for fuchsia.googlesource.com [#4402](https://github.com/dependabot/dependabot-core/pull/4402)
+
+## v0.166.0, 11 November 2021
+
+- Ignore errors from Source enterprise check and ignore known failures [#4401](https://github.com/dependabot/dependabot-core/pull/4401)
+- Bump to go 1.17.3 (@jeffwidman) [#4393](https://github.com/dependabot/dependabot-core/pull/4393)
+- Move composer-not-found fixture from decommissioned dependabot.com [#4399](https://github.com/dependabot/dependabot-core/pull/4399)
+
+## v0.165.0, 8 November 2021
+
+- Add timeout per operation [#4362](https://github.com/dependabot/dependabot-core/pull/4362)
+
+## v0.164.1, 2 November 2021
+
+- Only check auth for github.com when running `bump-version` [#4347](https://github.com/dependabot/dependabot-core/pull/4347)
+- Ensure we cleanup tmp directories after use [#4356](https://github.com/dependabot/dependabot-core/pull/4356)
+- Treat GHES hosted sources as github sources [#4335](https://github.com/dependabot/dependabot-core/pull/4335)
+
+## v0.164.0, 27 October 2021
+
+- Add license to image and gemspec [#4317](https://github.com/dependabot/dependabot-core/pull/4317)
+- Gitlab: add support for creating merge requests for forks (@andrcuns) [#4324](https://github.com/dependabot/dependabot-core/pull/4324)
 - update Elixir from 1.12.2 -> 1.12.3 (@baseballlover723) [#4250](https://github.com/dependabot/dependabot-core/pull/4250)
 - build(deps): bump flake8 from 4.0.0 to 4.0.1 in /python/helpers [#4308](https://github.com/dependabot/dependabot-core/pull/4308)
 - Bump Terraform from 1.0.6 to 1.0.8 [#4310](https://github.com/dependabot/dependabot-core/pull/4310)
