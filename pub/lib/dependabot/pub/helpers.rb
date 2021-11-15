@@ -53,10 +53,8 @@ module Dependabot
         hash = sha256.hexdigest
 
         cache_file = "/tmp/report-#{hash}-pid-#{Process.pid}.json"
-        if File.file?(cache_file)
-          return JSON.parse(File.read(cache_file))
-        end
-        
+        return JSON.parse(File.read(cache_file)) if File.file?(cache_file)
+
         report = run_dependency_services("report")[1]
         File.write(cache_file, JSON.generate(report))
         report
@@ -69,7 +67,7 @@ module Dependabot
           package_manager: "pub",
           requirements: []
         }
-        if json["kind"] != "transitive" && json["constraint"] != nil
+        if json["kind"] != "transitive" && !json["constraint"].nil?
           constraint = json["constraint"]
           params[:requirements] << {
             requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
@@ -84,7 +82,7 @@ module Dependabot
             previous_version: Dependabot::Pub::Version.new(json["previous"]),
             previous_requirements: []
           }
-          if json["kind"] != "transitive" && json["previousConstraint"] != nil
+          if json["kind"] != "transitive" && !json["previousConstraint"].nil?
             constraint = json["previousConstraint"]
             params[:previous_requirements] << {
               requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
@@ -106,7 +104,7 @@ module Dependabot
               "name" => d.name,
               "version" => d.version
             }
-            if !d.requirements.nil? && d.requirements.length > 1
+            unless d.requirements.nil? && d.requirements.length > 1
               obj["constraint"] = d.requirements[0].requirement.to_s
             end
             obj
