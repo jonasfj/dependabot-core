@@ -2,7 +2,6 @@
 
 require "dependabot/file_fetchers"
 require "dependabot/file_fetchers/base"
-require "dependabot/cargo/file_parser"
 
 # For details on pub packages, see:
 # https://dart.dev/tools/pub/package-layout#the-pubspec
