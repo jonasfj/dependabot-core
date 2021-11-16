@@ -79,7 +79,7 @@ module Dependabot
         if json["previousVersion"]
           params = {
             **params,
-            previous_version: Dependabot::Pub::Version.new(json["previous"]),
+            previous_version: Dependabot::Pub::Version.new(json["previousVersion"]),
             previous_requirements: []
           }
           if json["kind"] != "transitive" && !json["previousConstraint"].nil?
