@@ -104,7 +104,7 @@ allows checking for available updates.
       // It can also involve breaking changes for transitive dependencies. But
       // breaking changes for direct-dependencies is only possible if the
       // manifest allows this.
-      "single-breaking": [
+      "singleBreaking": [
         {
            "name":            "<package-name>",
            "version":         "<new-version>" || null, // null, if removed
@@ -132,7 +132,7 @@ allows checking for available updates.
       //  * Avoid changes to other dependencies when possible.
       //
       // This can involve breaking changes for any dependency.
-      "multi-breaking": [
+      "multiBreaking": [
         {
            "name":            "<package-name>",
            "version":         "<new-version>" || null, // null, if removed

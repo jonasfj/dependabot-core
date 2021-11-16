@@ -30,7 +30,7 @@ module Dependabot
       def latest_resolvable_version
         # Latest version we can get if we're allowed to unlock the current
         # package in pubspec.yaml
-        entry = current_report["single-breaking"].find { |d| d["name"] == dependency.name }
+        entry = current_report["singleBreaking"].find { |d| d["name"] == dependency.name }
         return nil unless entry
 
         new_version = Dependabot::Pub::Version.new(entry["version"])
@@ -45,22 +45,22 @@ module Dependabot
       def updated_requirements
         # Requirements that need to be changed, if obtain:
         # latest_resolvable_version
-        entry = current_report["single-breaking"].find { |d| d["name"] == dependency.name }
+        entry = current_report["singleBreaking"].find { |d| d["name"] == dependency.name }
         return unless entry
 
         to_dependency(entry).requirements
       end
 
       def latest_version_resolvable_with_full_unlock?
-        entry = current_report["multi-breaking"].find { |d| d["name"] == dependency.name }
+        entry = current_report["multiBreaking"].find { |d| d["name"] == dependency.name }
         # This a bit dumb, but full-unlock is only considered if we can get the
         # latest version!
         entry && latest_version != Dependabot::Pub::Version.new(entry["version"])
       end
 
       def updated_dependencies_after_full_unlock
-        # We only expose direct-dependencies here...
-        direct_deps = current_report["multi-breaking"].reject do |d|
+        # We only expose non-transitive dependencies here...
+        direct_deps = current_report["multiBreaking"].reject do |d|
           d["kind"] == "transitive"
         end
         direct_deps.map do |d|
