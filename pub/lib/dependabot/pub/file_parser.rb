@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "dependabot/file_parsers"
+require "dependabot/file_parsers/base"
 require "dependabot/dependency"
 require "dependabot/pub/version"
 require "dependabot/pub/helpers"
