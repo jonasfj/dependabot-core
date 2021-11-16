@@ -104,7 +104,7 @@ module Dependabot
               "name" => d.name,
               "version" => d.version
             }
-            unless d.requirements.nil? && d.requirements.length > 1
+            unless d.requirements.nil? || (d.requirements.length <= 1)
               obj["constraint"] = d.requirements[0].requirement.to_s
             end
             obj
