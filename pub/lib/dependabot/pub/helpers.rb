@@ -22,7 +22,7 @@ module Dependabot
               {
                 "CI" => "true",
                 "PUB_ENVIRONMENT" => "dependabot",
-                "FLUTTER_ROOT" => nil # TODO: Configure FLUTTER_ROOT for all packages
+                "FLUTTER_ROOT" => "/opt/dart/flutter"
               },
               "dart",
               "pub",
