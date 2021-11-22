@@ -52,7 +52,7 @@ RSpec.describe Dependabot::Cargo::FileParser do
             expect(dependency.version).to be_nil
             expect(dependency.requirements).to eq(
               [{
-                requirement: "0.1.11",
+                requirement: "0.1.12",
                 file: "Cargo.toml",
                 groups: ["dependencies"],
                 source: nil
