@@ -16,7 +16,7 @@ require "rubygems_version_patch"
 module Dependabot
   module Pub
     class Version < Gem::Version
-      VERSION_PATTERN = Gem::Version::VERSION_PATTERN + '(\+[0-9a-zA-Z\-.]+)?'
+      VERSION_PATTERN = Gem::Version::VERSION_PATTERN + "(\\+[0-9a-zA-Z\\-.]+)?"
       ANCHORED_VERSION_PATTERN = /\A\s*(#{VERSION_PATTERN})?\s*\z/.freeze
 
       attr_reader :build_info

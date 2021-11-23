@@ -77,16 +77,9 @@ module Dependabot
       end
 
       def convert_range_req(req_string)
-        reqs = req_string.scan(
-          /
-            (?:>|<|=|<=|>=) # comparison operator
-            (?:\d+)\.(?:\d+)\.(?:\d+) # Version number.
-            (?:-(?:[0-9A-Za-z-]+(?:\.[?:0-9A-Za-z-]+)*))? # Pre-release.
-            (?:\+(?:[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))? # Build.
-            \s* # trailing whitespace
-          /x
-        ).map!(&:strip!)
-        reqs
+        req_string.scan(
+          /((?:>|<|=|<=|>=)\s*#{Pub::Version::VERSION_PATTERN})\s*/
+        ).map { |x| x[0].strip }
       end
 
       def ruby_range(req_string)
@@ -114,7 +107,8 @@ module Dependabot
         upper_bound = parts.map.with_index do |part, i|
           if i < first_non_zero_index then part
           elsif i == first_non_zero_index then (part.to_i + 1).to_s
-          else 0
+          else
+            0
           end
         end.join(".")
 
