@@ -2,11 +2,25 @@
 
 require "dependabot/update_checkers"
 require "dependabot/update_checkers/base"
+require "dependabot/pub/helpers"
 
 module Dependabot
   module Pub
     class UpdateChecker < Dependabot::UpdateCheckers::Base
       include Dependabot::Pub::Helpers
+
+      def initialize(dependency:, dependency_files:, repo_contents_path: nil,
+                     credentials:, ignored_versions: [],
+                     raise_on_ignored: false, security_advisories: [],
+                     requirements_update_strategy: nil,
+                     options: {}, test_host: nil)
+        @test_host = test_host
+        super(dependency: dependency, dependency_files: dependency_files, repo_contents_path: repo_contents_path,
+              credentials: credentials, ignored_versions: ignored_versions,
+              raise_on_ignored: raise_on_ignored, security_advisories: security_advisories,
+              requirements_update_strategy: requirements_update_strategy,
+              options: options)
+      end
 
       def latest_version
         Dependabot::Pub::Version.new(current_report["latest"])
@@ -48,8 +62,12 @@ module Dependabot
         entry = current_report["singleBreaking"].find { |d| d["name"] == dependency.name }
         return unless entry
 
-        to_dependency(entry).requirements
+        a = to_dependency(entry).requirements
+        puts a
+        a
       end
+
+      private
 
       def latest_version_resolvable_with_full_unlock?
         entry = current_report["multiBreaking"].find { |d| d["name"] == dependency.name }
@@ -67,8 +85,6 @@ module Dependabot
           to_dependency(d)
         end
       end
-
-      private
 
       def report
         @report ||= run_dependency_services_report

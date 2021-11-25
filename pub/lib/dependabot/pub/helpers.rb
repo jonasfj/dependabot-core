@@ -20,12 +20,14 @@ module Dependabot
             File.write(f.name, f.content)
           end
           SharedHelpers.with_git_configured(credentials: credentials) do
+            env = {
+              "CI" => "true",
+              "PUB_ENVIRONMENT" => "dependabot",
+              "FLUTTER_ROOT" => "/opt/dart/flutter",
+              "PUB_HOSTED_URL" => @test_host
+            }
             stdout, stderr, status = Open3.capture3(
-              {
-                "CI" => "true",
-                "PUB_ENVIRONMENT" => "dependabot",
-                "FLUTTER_ROOT" => "/opt/dart/flutter"
-              },
+              env.compact,
               "dart",
               "pub",
               "global",
