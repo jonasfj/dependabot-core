@@ -20,6 +20,8 @@ module Dependabot
         dependency_set.dependencies.sort_by(&:name)
       end
 
+      private
+
       def check_required_files
         raise "No pubspec.yaml!" unless get_original_file("pubspec.yaml")
       end
