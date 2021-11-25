@@ -11,6 +11,8 @@ require "dependabot/pub/requirement"
 module Dependabot
   module Pub
     module Helpers
+      private
+
       def run_dependency_services(command, args = [], dependency_changes: nil)
         SharedHelpers.in_a_temporary_directory do
           dependency_files.each do |f|
@@ -63,14 +65,14 @@ module Dependabot
       def to_dependency(json)
         params = {
           name: json["name"],
-          version: Dependabot::Pub::Version.new(json["version"]),
+          version: json["version"],
           package_manager: "pub",
           requirements: []
         }
         if json["kind"] != "transitive" && !json["constraint"].nil?
           constraint = json["constraint"]
           params[:requirements] << {
-            requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
+            requirement: constraint,
             groups: [json["kind"]],
             source: nil, # TODO: Expose some information about the source
             file: "pubspec.yaml" # TODO: Figure out how to handle mono-repos
@@ -85,7 +87,7 @@ module Dependabot
           if json["kind"] != "transitive" && !json["previousConstraint"].nil?
             constraint = json["previousConstraint"]
             params[:previous_requirements] << {
-              requirement: Pub::Requirement.new(constraint, raw_constraint: constraint),
+              requirement: constraint,
               groups: [json["kind"]],
               source: nil, # TODO: Expose some information about the source
               file: "pubspec.yaml"
