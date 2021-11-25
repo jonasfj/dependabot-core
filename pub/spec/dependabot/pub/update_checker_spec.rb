@@ -29,7 +29,6 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
     sample_files.each do |f|
       package = File.basename(f, ".json")
       @server.mount_proc "/api/packages/#{package}" do |_req, res|
-        puts Dir.pwd
         res.body = File.read(File.join("..", "..", f))
       end
     end

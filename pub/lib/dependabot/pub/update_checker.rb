@@ -62,9 +62,7 @@ module Dependabot
         entry = current_report["singleBreaking"].find { |d| d["name"] == dependency.name }
         return unless entry
 
-        a = to_dependency(entry).requirements
-        puts a
-        a
+        to_dependency(entry).requirements
       end
 
       private
