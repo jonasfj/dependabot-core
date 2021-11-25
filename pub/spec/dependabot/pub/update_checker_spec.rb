@@ -55,7 +55,7 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
         "password" => "token"
       }],
       ignored_versions: ignored_versions,
-      test_host: "http://localhost:#{@server[:Port]}"
+      pub_hosted_url: "http://localhost:#{@server[:Port]}"
     )
   end
 

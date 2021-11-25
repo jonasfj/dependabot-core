@@ -13,8 +13,8 @@ module Dependabot
                      credentials:, ignored_versions: [],
                      raise_on_ignored: false, security_advisories: [],
                      requirements_update_strategy: nil,
-                     options: {}, test_host: nil)
-        @test_host = test_host
+                     options: {}, pub_hosted_url: nil)
+        @pub_hosted_url = pub_hosted_url
         super(dependency: dependency, dependency_files: dependency_files, repo_contents_path: repo_contents_path,
               credentials: credentials, ignored_versions: ignored_versions,
               raise_on_ignored: raise_on_ignored, security_advisories: security_advisories,

@@ -24,7 +24,7 @@ module Dependabot
               "CI" => "true",
               "PUB_ENVIRONMENT" => "dependabot",
               "FLUTTER_ROOT" => "/opt/dart/flutter",
-              "PUB_HOSTED_URL" => @test_host
+              "PUB_HOSTED_URL" => @pub_hosted_url
             }
             stdout, stderr, status = Open3.capture3(
               env.compact,
