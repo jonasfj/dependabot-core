@@ -26,8 +26,6 @@ module Dependabot
         raise "No pubspec.yaml!" unless get_original_file("pubspec.yaml")
       end
 
-      private
-
       def list
         @list ||= run_dependency_services("list")[1]
       end
