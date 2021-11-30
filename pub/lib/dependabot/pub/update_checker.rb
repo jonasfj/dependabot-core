@@ -71,7 +71,7 @@ module Dependabot
         entry = current_report["multiBreaking"].find { |d| d["name"] == dependency.name }
         # This a bit dumb, but full-unlock is only considered if we can get the
         # latest version!
-        entry && latest_version != Dependabot::Pub::Version.new(entry["version"])
+        entry && latest_version == Dependabot::Pub::Version.new(entry["version"])
       end
 
       def updated_dependencies_after_full_unlock
