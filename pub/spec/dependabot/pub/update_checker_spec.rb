@@ -63,7 +63,8 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
   let(:dependency) do
     Dependabot::Dependency.new(
       name: dependency_name,
-      version: "2.0.0",
+      # This version is ignored by dependency_services, but will be seen by base
+      version: "0.0.0",
       requirements: requirements,
       package_manager: "pub"
     )
@@ -75,18 +76,83 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
   let(:dependency_files) do
     project_dependency_files(project)
   end
+  let(:project) { "can_update" }
 
+  let(:requirements_to_unlock) { :own }
   describe "#can_update?" do
-    subject { checker.can_update?(requirements_to_unlock: :own) }
+    subject { checker.can_update?(requirements_to_unlock: requirements_to_unlock) }
 
-    context "given an outdated dependency" do
-      let(:project) { "hat_version_can_update" }
-      it { is_expected.to be_truthy }
+    context "given an outdated dependency, not requiring unlock" do
+      let(:dependency_name) { "collection" }
+
+      context "unlocking all" do
+        let(:requirements_to_unlock) { :all }
+        it { is_expected.to be_truthy }
+      end
+
+      context "unlocking own" do
+        let(:requirements_to_unlock) { :own }
+        it { is_expected.to be_truthy }
+      end
+
+      context "unlocking none" do
+        let(:requirements_to_unlock) { :none }
+        it { is_expected.to be_truthy }
+      end
     end
+    context "given an outdated dependency, requiring unlock" do
+      let(:dependency_name) { "retry" }
 
+      context "unlocking all" do
+        let(:requirements_to_unlock) { :all }
+        it { is_expected.to be_truthy }
+      end
+
+      context "unlocking own" do
+        let(:requirements_to_unlock) { :own }
+        it { is_expected.to be_truthy }
+      end
+
+      context "unlocking none" do
+        let(:requirements_to_unlock) { :none }
+        it { is_expected.to be_falsey }
+      end
+    end
+    context "given an outdated dependency, requiring full unlock" do
+      let(:dependency_name) { "protobuf" }
+
+      context "unlocking all" do
+        let(:requirements_to_unlock) { :all }
+        it { is_expected.to be_truthy }
+      end
+
+      context "unlocking own" do
+        let(:requirements_to_unlock) { :own }
+        it { is_expected.to be_falsey }
+      end
+
+      context "unlocking none" do
+        let(:requirements_to_unlock) { :none }
+        it { is_expected.to be_falsey }
+      end
+    end
     context "given an up-to-date dependency" do
-      let(:project) { "hat_version_up_to_date" }
-      it { is_expected.to be_falsey }
+      let(:dependency_name) { "path" }
+
+      context "unlocking all" do
+        let(:requirements_to_unlock) { :all }
+        it { is_expected.to be_falsey }
+      end
+
+      context "unlocking own" do
+        let(:requirements_to_unlock) { :own }
+        it { is_expected.to be_falsey }
+      end
+
+      context "unlocking none" do
+        let(:requirements_to_unlock) { :none }
+        it { is_expected.to be_falsey }
+      end
     end
   end
 
