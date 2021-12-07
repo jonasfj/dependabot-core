@@ -54,7 +54,7 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
         "password" => "token"
       }],
       ignored_versions: ignored_versions,
-      pub_hosted_url: "http://localhost:#{@server[:Port]}",
+      pub_hosted_url: "http://localhost:#{@server[:Port]}"
     )
   end
 
@@ -77,14 +77,16 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
     files = project_dependency_files(project)
     files.each do |file|
       # Simulate that the lockfile was from localhost:
-     file.content.gsub!("https://pub.dartlang.org", "http://localhost:#{@server[:Port]}")
+      file.content.gsub!("https://pub.dartlang.org", "http://localhost:#{@server[:Port]}")
     end
     files
   end
   let(:project) { "can_update" }
 
   let(:can_update) { checker.can_update?(requirements_to_unlock: requirements_to_unlock) }
-  let(:updated_requirements) { checker.updated_requirements }
+  let(:updated_dependencies) do
+    checker.updated_dependencies(requirements_to_unlock: requirements_to_unlock).map &:to_h
+  end
 
   context "given an outdated dependency, not requiring unlock" do
     let(:dependency_name) { "collection" }
@@ -93,6 +95,18 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :all }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          { "name" => "collection",
+            "package_manager" => "pub",
+            "previous_requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^1.14.13", source: nil
+            }],
+            "previous_version" => "1.14.13",
+            "requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^1.15.0", source: nil
+            }],
+            "version" => "1.15.0" }
+        ]
       end
     end
 
@@ -100,6 +114,18 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :own }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          { "name" => "collection",
+            "package_manager" => "pub",
+            "previous_requirements" => [],
+            # TODO(sigurdm): Dependabut lifts this from the original dependency.
+            # Should we override latest_resolvable_previous_version?
+            "previous_version" => "0.0.0",
+            "requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^1.15.0", source: nil
+            }],
+            "version" => "1.15.0" }
+        ]
       end
     end
 
@@ -107,6 +133,16 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :none }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          { "name" => "collection",
+            "package_manager" => "pub",
+            "previous_requirements" => [],
+            # TODO(sigurdm): Dependabut lifts this from the original dependency.
+            # Should we override latest_resolvable_previous_version?
+            "previous_version" => "0.0.0",
+            "requirements" => [],
+            "version" => "1.15.0" }
+        ]
       end
     end
   end
@@ -117,6 +153,18 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :all }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          { "name" => "retry",
+            "package_manager" => "pub",
+            "previous_requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^2.0.0", source: nil
+            }],
+            "previous_version" => "2.0.0",
+            "requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^3.1.0", source: nil
+            }],
+            "version" => "3.1.0" }
+        ]
       end
     end
 
@@ -124,6 +172,16 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :own }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          { "name" => "retry",
+            "package_manager" => "pub",
+            "previous_requirements" => [],
+            "previous_version" => "0.0.0",
+            "requirements" => [{
+              file: "pubspec.yaml", groups: ["direct"], requirement: "^3.1.0", source: nil
+            }],
+            "version" => "3.1.0" }
+        ]
       end
     end
 
@@ -141,6 +199,29 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       let(:requirements_to_unlock) { :all }
       it "can update" do
         expect(can_update).to be_truthy
+        expect(updated_dependencies).to eq [
+          {
+            "name" => "protobuf",
+            "version" => "2.0.0",
+            "requirements" => [{ requirement: "^2.0.0", groups: ["direct"], source: nil, file: "pubspec.yaml" }],
+            "previous_version" => "1.1.4",
+            "previous_requirements" => [{
+              requirement: "1.1.4", groups: ["direct"], source: nil, file: "pubspec.yaml"
+            }],
+            "package_manager" => "pub"
+          },
+          {
+            "name" => "fixnum",
+            "version" => "1.0.0",
+            "requirements" => [{ requirement: "^1.0.0", groups: ["direct"], source: nil, file: "pubspec.yaml" }],
+            "previous_version" => "0.10.11",
+            "previous_requirements" => [{
+              requirement: "0.10.11", groups: ["direct"], source: nil, file: "pubspec.yaml"
+            }],
+            "package_manager" => "pub"
+          }
+
+        ]
       end
     end
 
@@ -182,6 +263,4 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       end
     end
   end
-
-  # TODO(sigurdm): more tests
 end
