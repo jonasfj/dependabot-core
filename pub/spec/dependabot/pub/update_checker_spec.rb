@@ -82,10 +82,11 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
     files
   end
   let(:project) { "can_update" }
+  let(:directory) { nil }
 
   let(:can_update) { checker.can_update?(requirements_to_unlock: requirements_to_unlock) }
   let(:updated_dependencies) do
-    checker.updated_dependencies(requirements_to_unlock: requirements_to_unlock).map &:to_h
+    checker.updated_dependencies(requirements_to_unlock: requirements_to_unlock).map(&:to_h)
   end
 
   context "given an outdated dependency, not requiring unlock" do
@@ -118,8 +119,7 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
           { "name" => "collection",
             "package_manager" => "pub",
             "previous_requirements" => [],
-            # TODO(sigurdm): Dependabut lifts this from the original dependency.
-            # Should we override latest_resolvable_previous_version?
+            # Dependabot lifts this from the original dependency.
             "previous_version" => "0.0.0",
             "requirements" => [{
               file: "pubspec.yaml", groups: ["direct"], requirement: "^1.15.0", source: nil
@@ -137,8 +137,7 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
           { "name" => "collection",
             "package_manager" => "pub",
             "previous_requirements" => [],
-            # TODO(sigurdm): Dependabut lifts this from the original dependency.
-            # Should we override latest_resolvable_previous_version?
+            # Dependabot lifts this from the original dependency.
             "previous_version" => "0.0.0",
             "requirements" => [],
             "version" => "1.15.0" }
@@ -259,6 +258,18 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
     context "unlocking none" do
       let(:requirements_to_unlock) { :none }
       it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+  end
+
+  context "mono repo" do
+    let(:project) { "mono_repo_main_at_root" }
+    let(:dependency_name) { "dep" }
+    context "unlocking none" do
+      let(:requirements_to_unlock) { :none }
+      it "can update" do
+        expect(checker.latest_version.to_s).to eq "1.0.0"
         expect(can_update).to be_falsey
       end
     end
