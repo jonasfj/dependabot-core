@@ -77,13 +77,13 @@ module Dependabot
             requirement: constraint,
             groups: [json["kind"]],
             source: nil, # TODO: Expose some information about the source
-            file: "pubspec.yaml" # TODO: Figure out how to handle mono-repos
+            file: "pubspec.yaml"
           }
         end
         if json["previousVersion"]
           params = {
             **params,
-            previous_version: Dependabot::Pub::Version.new(json["previousVersion"]),
+            previous_version: json["previousVersion"],
             previous_requirements: []
           }
           if json["kind"] != "transitive" && !json["previousConstraint"].nil?
