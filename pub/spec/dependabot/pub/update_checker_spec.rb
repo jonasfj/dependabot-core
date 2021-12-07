@@ -48,13 +48,13 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
       dependency: dependency,
       dependency_files: dependency_files,
       credentials: [{
-        "type" => "git_source",
-        "host" => "github.com",
+        "type" => "hosted",
+        "host" => "pub.dartlang.org",
         "username" => "x-access-token",
         "password" => "token"
       }],
       ignored_versions: ignored_versions,
-      pub_hosted_url: "http://localhost:#{@server[:Port]}"
+      pub_hosted_url: "http://localhost:#{@server[:Port]}",
     )
   end
 
@@ -74,84 +74,111 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
   let(:requirements) { [] }
 
   let(:dependency_files) do
-    project_dependency_files(project)
+    files = project_dependency_files(project)
+    files.each do |file|
+      # Simulate that the lockfile was from localhost:
+     file.content.gsub!("https://pub.dartlang.org", "http://localhost:#{@server[:Port]}")
+    end
+    files
   end
   let(:project) { "can_update" }
 
-  let(:requirements_to_unlock) { :own }
-  describe "#can_update?" do
-    subject { checker.can_update?(requirements_to_unlock: requirements_to_unlock) }
+  let(:can_update) { checker.can_update?(requirements_to_unlock: requirements_to_unlock) }
+  let(:updated_requirements) { checker.updated_requirements }
 
-    context "given an outdated dependency, not requiring unlock" do
-      let(:dependency_name) { "collection" }
+  context "given an outdated dependency, not requiring unlock" do
+    let(:dependency_name) { "collection" }
 
-      context "unlocking all" do
-        let(:requirements_to_unlock) { :all }
-        it { is_expected.to be_truthy }
-      end
-
-      context "unlocking own" do
-        let(:requirements_to_unlock) { :own }
-        it { is_expected.to be_truthy }
-      end
-
-      context "unlocking none" do
-        let(:requirements_to_unlock) { :none }
-        it { is_expected.to be_truthy }
+    context "unlocking all" do
+      let(:requirements_to_unlock) { :all }
+      it "can update" do
+        expect(can_update).to be_truthy
       end
     end
-    context "given an outdated dependency, requiring unlock" do
-      let(:dependency_name) { "retry" }
 
-      context "unlocking all" do
-        let(:requirements_to_unlock) { :all }
-        it { is_expected.to be_truthy }
-      end
-
-      context "unlocking own" do
-        let(:requirements_to_unlock) { :own }
-        it { is_expected.to be_truthy }
-      end
-
-      context "unlocking none" do
-        let(:requirements_to_unlock) { :none }
-        it { is_expected.to be_falsey }
+    context "unlocking own" do
+      let(:requirements_to_unlock) { :own }
+      it "can update" do
+        expect(can_update).to be_truthy
       end
     end
-    context "given an outdated dependency, requiring full unlock" do
-      let(:dependency_name) { "protobuf" }
 
-      context "unlocking all" do
-        let(:requirements_to_unlock) { :all }
-        it { is_expected.to be_truthy }
-      end
-
-      context "unlocking own" do
-        let(:requirements_to_unlock) { :own }
-        it { is_expected.to be_falsey }
-      end
-
-      context "unlocking none" do
-        let(:requirements_to_unlock) { :none }
-        it { is_expected.to be_falsey }
+    context "unlocking none" do
+      let(:requirements_to_unlock) { :none }
+      it "can update" do
+        expect(can_update).to be_truthy
       end
     end
-    context "given an up-to-date dependency" do
-      let(:dependency_name) { "path" }
+  end
+  context "given an outdated dependency, requiring unlock" do
+    let(:dependency_name) { "retry" }
 
-      context "unlocking all" do
-        let(:requirements_to_unlock) { :all }
-        it { is_expected.to be_falsey }
+    context "unlocking all" do
+      let(:requirements_to_unlock) { :all }
+      it "can update" do
+        expect(can_update).to be_truthy
       end
+    end
 
-      context "unlocking own" do
-        let(:requirements_to_unlock) { :own }
-        it { is_expected.to be_falsey }
+    context "unlocking own" do
+      let(:requirements_to_unlock) { :own }
+      it "can update" do
+        expect(can_update).to be_truthy
       end
+    end
 
-      context "unlocking none" do
-        let(:requirements_to_unlock) { :none }
-        it { is_expected.to be_falsey }
+    context "unlocking none" do
+      let(:requirements_to_unlock) { :none }
+      it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+  end
+  context "given an outdated dependency, requiring full unlock" do
+    let(:dependency_name) { "protobuf" }
+
+    context "unlocking all" do
+      let(:requirements_to_unlock) { :all }
+      it "can update" do
+        expect(can_update).to be_truthy
+      end
+    end
+
+    context "unlocking own" do
+      let(:requirements_to_unlock) { :own }
+      it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+
+    context "unlocking none" do
+      let(:requirements_to_unlock) { :none }
+      it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+  end
+  context "given an up-to-date dependency" do
+    let(:dependency_name) { "path" }
+
+    context "unlocking all" do
+      let(:requirements_to_unlock) { :all }
+      it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+
+    context "unlocking own" do
+      let(:requirements_to_unlock) { :own }
+      it "can update" do
+        expect(can_update).to be_falsey
+      end
+    end
+
+    context "unlocking none" do
+      let(:requirements_to_unlock) { :none }
+      it "can update" do
+        expect(can_update).to be_falsey
       end
     end
   end
