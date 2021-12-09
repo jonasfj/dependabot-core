@@ -16,8 +16,9 @@ module Dependabot
       def run_dependency_services(command, args = [], dependency_changes: nil)
         SharedHelpers.in_a_temporary_directory do
           dependency_files.each do |f|
-            FileUtils.mkdir_p File.dirname(f.name)
-            File.write(f.name, f.content)
+            in_path_name = File.join(Dir.pwd, f.directory, f.name)
+            FileUtils.mkdir_p File.dirname(in_path_name)
+            File.write(in_path_name, f.content)
           end
           SharedHelpers.with_git_configured(credentials: credentials) do
             env = {
@@ -26,25 +27,27 @@ module Dependabot
               "FLUTTER_ROOT" => "/opt/dart/flutter",
               "PUB_HOSTED_URL" => @pub_hosted_url
             }
-            stdout, stderr, status = Open3.capture3(
-              env.compact,
-              "dart",
-              "pub",
-              "global",
-              "run",
-              "pub:dependency_services",
-              command,
-              *args,
-              stdin_data: dependencies_to_json(dependency_changes)
-            )
-            raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
+            Dir.chdir File.join(Dir.pwd, dependency_files.first.directory) do
+              stdout, stderr, status = Open3.capture3(
+                env.compact,
+                "dart",
+                "pub",
+                "global",
+                "run",
+                "pub:dependency_services",
+                command,
+                *args,
+                stdin_data: dependencies_to_json(dependency_changes)
+              )
+              raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
 
-            updated_files = dependency_files.map do |f|
-              updated_file = f.dup
-              updated_file.content = File.read(f.name)
-              updated_file
+              updated_files = dependency_files.map do |f|
+                updated_file = f.dup
+                updated_file.content = File.read(f.name)
+                updated_file
+              end
+              return updated_files, JSON.parse(stdout)["dependencies"]
             end
-            return updated_files, JSON.parse(stdout)["dependencies"]
           end
         end
       end
