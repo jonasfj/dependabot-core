@@ -85,7 +85,7 @@ module Dependabot
       end
 
       def report
-        @report ||= run_dependency_services_report
+        @report ||= dependency_services_report
       end
 
       def current_report

@@ -13,7 +13,37 @@ module Dependabot
     module Helpers
       private
 
-      def run_dependency_services(command, args = [], dependency_changes: nil)
+      def dependency_services_list
+        JSON.parse(run_dependency_services("list"))["dependencies"]
+      end
+
+      def dependency_services_report
+        sha256 = Digest::SHA256.new
+        dependency_files.each do |f|
+          sha256 << f.path + "\n" + f.content + "\n"
+        end
+        hash = sha256.hexdigest
+
+        cache_file = "/tmp/report-#{hash}-pid-#{Process.pid}.json"
+        return JSON.parse(File.read(cache_file)) if File.file?(cache_file)
+
+        report = JSON.parse(run_dependency_services("report"))["dependencies"]
+        File.write(cache_file, JSON.generate(report))
+        report
+      end
+
+      def dependency_services_apply(dependency_changes)
+        run_dependency_services("apply", stdin_data: dependencies_to_json(dependency_changes)) do
+            dependency_files.map do |f|
+              updated_file = f.dup
+              updated_file.content = File.read(f.name)
+              updated_file
+            end
+        end
+
+      end
+
+      def run_dependency_services(command, stdin_data: nil)
         SharedHelpers.in_a_temporary_directory do
           dependency_files.each do |f|
             in_path_name = File.join(Dir.pwd, f.directory, f.name)
@@ -36,35 +66,14 @@ module Dependabot
                 "run",
                 "pub:dependency_services",
                 command,
-                *args,
-                stdin_data: dependencies_to_json(dependency_changes)
+                stdin_data: stdin_data
               )
               raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
-
-              updated_files = dependency_files.map do |f|
-                updated_file = f.dup
-                updated_file.content = File.read(f.name)
-                updated_file
-              end
-              return updated_files, JSON.parse(stdout)["dependencies"]
+              return stdout unless block_given?
+              yield
             end
           end
         end
-      end
-
-      def run_dependency_services_report
-        sha256 = Digest::SHA256.new
-        dependency_files.each do |f|
-          sha256 << f.path + "\n" + f.content + "\n"
-        end
-        hash = sha256.hexdigest
-
-        cache_file = "/tmp/report-#{hash}-pid-#{Process.pid}.json"
-        return JSON.parse(File.read(cache_file)) if File.file?(cache_file)
-
-        report = run_dependency_services("report")[1]
-        File.write(cache_file, JSON.generate(report))
-        report
       end
 
       def to_dependency(json)
@@ -111,8 +120,8 @@ module Dependabot
               "name" => d.name,
               "version" => d.version
             }
-            unless d.requirements.nil? || (d.requirements.length <= 1)
-              obj["constraint"] = d.requirements[0].requirement.to_s
+            unless d.requirements.nil? || d.requirements.empty?
+              obj["constraint"] = d.requirements[0][:requirement].to_s
             end
             obj
           end

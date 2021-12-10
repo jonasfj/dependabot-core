@@ -27,7 +27,7 @@ module Dependabot
       end
 
       def list
-        @list ||= run_dependency_services("list")[1]
+        @list ||= dependency_services_list
       end
     end
   end

@@ -14,7 +14,8 @@ RSpec.describe Dependabot::Pub::UpdateChecker do
   before(:all) do
     # Because we do the networking in dependency_services we have to run an
     # actual web server.
-    @server = WEBrick::HTTPServer.new({ Port: 0, AccessLog: [] })
+    dev_null = WEBrick::Log::new("/dev/null", 7)
+    @server = WEBrick::HTTPServer.new({ Port: 0, AccessLog: [], Logger: dev_null })
     Thread.new do
       @server.start
     end
