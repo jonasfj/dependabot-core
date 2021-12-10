@@ -34,13 +34,12 @@ module Dependabot
 
       def dependency_services_apply(dependency_changes)
         run_dependency_services("apply", stdin_data: dependencies_to_json(dependency_changes)) do
-            dependency_files.map do |f|
-              updated_file = f.dup
-              updated_file.content = File.read(f.name)
-              updated_file
-            end
+          dependency_files.map do |f|
+            updated_file = f.dup
+            updated_file.content = File.read(f.name)
+            updated_file
+          end
         end
-
       end
 
       def run_dependency_services(command, stdin_data: nil)
@@ -70,6 +69,7 @@ module Dependabot
               )
               raise Dependabot::DependabotError, "dart pub failed: #{stderr}" unless status.success?
               return stdout unless block_given?
+
               yield
             end
           end
@@ -120,9 +120,8 @@ module Dependabot
               "name" => d.name,
               "version" => d.version
             }
-            unless d.requirements.nil? || d.requirements.empty?
-              obj["constraint"] = d.requirements[0][:requirement].to_s
-            end
+
+            obj["constraint"] = d.requirements[0][:requirement].to_s unless d.requirements.nil? || d.requirements.empty?
             obj
           end
           JSON.generate({
