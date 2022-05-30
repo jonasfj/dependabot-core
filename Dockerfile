@@ -65,7 +65,7 @@ RUN if ! getent group "$USER_GID"; then groupadd --gid "$USER_GID" dependabot ; 
 
 ### RUBY
 
-# Install Ruby, update RubyGems, and install Bundler
+# Install Ruby 2.7, update RubyGems, and install Bundler
 ENV BUNDLE_SILENCE_ROOT_WARNING=1
 # Disable the outdated rubygems installation from being loaded
 ENV DEBIAN_DISABLE_RUBYGEMS_INTEGRATION=true
@@ -78,29 +78,28 @@ RUN apt-add-repository ppa:brightbox/ruby-ng \
   && apt-get install -y --no-install-recommends ruby2.7 ruby2.7-dev \
   && gem update --system 3.2.20 \
   && gem install bundler -v 1.17.3 --no-document \
-  && gem install bundler -v 2.3.13 --no-document \
+  && gem install bundler -v 2.3.10 --no-document \
   && rm -rf /var/lib/gems/2.7.0/cache/* \
   && rm -rf /var/lib/apt/lists/*
 
 
 ### PYTHON
 
-# Install Python with pyenv.
+# Install Python 3.10 with pyenv.
 ENV PYENV_ROOT=/usr/local/.pyenv \
   PATH="/usr/local/.pyenv/bin:$PATH"
 RUN mkdir -p "$PYENV_ROOT" && chown dependabot:dependabot "$PYENV_ROOT"
 USER dependabot
-RUN git clone https://github.com/pyenv/pyenv.git --branch v2.3.0 --single-branch --depth=1 /usr/local/.pyenv \
-  # This is the version of CPython that gets installed
-  && pyenv install 3.10.4 \
-  && pyenv global 3.10.4 \
+RUN git clone https://github.com/pyenv/pyenv.git --branch v2.2.5 --single-branch --depth=1 /usr/local/.pyenv \
+  && pyenv install 3.10.3 \
+  && pyenv global 3.10.3 \
   && rm -Rf /tmp/python-build*
 USER root
 
 
 ### JAVASCRIPT
 
-# Install Node and npm
+# Install Node 16.0 and npm v8
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
   && rm -rf /var/lib/apt/lists/* \
@@ -110,8 +109,8 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
 
 ### ELM
 
-# Install Elm
-# This is currently amd64 only, see:
+# Install Elm 0.19
+# This is amd64 only, see:
 # - https://github.com/elm/compiler/issues/2007
 # - https://github.com/elm/compiler/issues/2232
 ENV PATH="$PATH:/node_modules/.bin"
@@ -124,10 +123,10 @@ RUN [ "$TARGETARCH" != "amd64" ] \
 
 ### PHP
 
-# Install PHP and Composer
+# Install PHP 7.4 and Composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
-COPY --from=composer:1.10.26 /usr/bin/composer /usr/local/bin/composer1
-COPY --from=composer:2.3.5 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:1.10.25 /usr/bin/composer /usr/local/bin/composer1
+COPY --from=composer:2.3.3 /usr/bin/composer /usr/local/bin/composer
 RUN add-apt-repository ppa:ondrej/php \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -175,10 +174,10 @@ USER root
 ### GO
 
 # Install Go
-ARG GOLANG_VERSION=1.18.1
+ARG GOLANG_VERSION=1.18
 # You can find the sha here: https://storage.googleapis.com/golang/go${GOLANG_VERSION}.linux-amd64.tar.gz.sha256
-ARG GOLANG_AMD64_CHECKSUM=b3b815f47ababac13810fc6021eb73d65478e0b2db4b09d348eefad9581a2334
-ARG GOLANG_ARM64_CHECKSUM=56a91851c97fb4697077abbca38860f735c32b38993ff79b088dac46e4735633
+ARG GOLANG_AMD64_CHECKSUM=e85278e98f57cdb150fe8409e6e5df5343ecb13cebf03a5d5ff12bd55a80264f
+ARG GOLANG_ARM64_CHECKSUM=7ac7b396a691e588c5fb57687759e6c4db84a2a3bbebb0765f4b38e5b1c5b00e
 
 ENV PATH=/opt/go/bin:$PATH
 RUN cd /tmp \
@@ -210,21 +209,21 @@ RUN curl -sSLfO https://packages.erlang-solutions.com/erlang-solutions_2.0_all.d
 
 ### RUST
 
-# Install Rust
+# Install Rust 1.59.0
 ENV RUSTUP_HOME=/opt/rust \
   CARGO_HOME=/opt/rust \
   PATH="${PATH}:/opt/rust/bin"
 RUN mkdir -p "$RUSTUP_HOME" && chown dependabot:dependabot "$RUSTUP_HOME"
 USER dependabot
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.61.0 --profile minimal
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.59.0 --profile minimal
 
 
 ### Terraform
 
 USER root
-ARG TERRAFORM_VERSION=1.2.0
-ARG TERRAFORM_AMD64_CHECKSUM=b87de03adbdfdff3c2552c8c8377552d0eecd787154465100cf4e29de4a7be1f
-ARG TERRAFORM_ARM64_CHECKSUM=ee80b8635d8fdbaed57beffe281cf87b8b1fd1ddb29c08d20e25a152d9f0f871
+ARG TERRAFORM_VERSION=1.1.6
+ARG TERRAFORM_AMD64_CHECKSUM=3e330ce4c8c0434cdd79fe04ed6f6e28e72db44c47ae50d01c342c8a2b05d331
+ARG TERRAFORM_ARM64_CHECKSUM=a53fb63625af3572f7252b9fb61d787ab153132a8984b12f4bb84b8ee408ec53
 RUN cd /tmp \
   && curl -o terraform-${TARGETARCH}.tar.gz https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TARGETARCH}.zip \
   && printf "$TERRAFORM_AMD64_CHECKSUM terraform-amd64.tar.gz\n$TERRAFORM_ARM64_CHECKSUM terraform-arm64.tar.gz\n" | sha256sum -c --ignore-missing - \
@@ -251,7 +250,7 @@ RUN DART_ARCH=${TARGETARCH} \
 # We pull the dependency_services from the dart-lang/pub repo as it is not
 # exposed from the Dart SDK (yet...).
 RUN git clone https://github.com/dart-lang/pub.git /opt/dart/pub \
-  && git -C /opt/dart/pub checkout 1e3c17ea871e6a80c720aa998f37cbd3913bc287 \
+  && git -C /opt/dart/pub checkout 6f20a94b074a1c2dc82d429fa04d365b4bcf65b6 \
   && dart pub global activate --source path /opt/dart/pub \
   && chmod -R o+r "/opt/dart/pub" \
   && chown -R dependabot:dependabot "$PUB_CACHE" \

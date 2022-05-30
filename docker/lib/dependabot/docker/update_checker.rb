@@ -146,7 +146,8 @@ module Dependabot
           # Prune out any downgrade tags before checking for pre-releases
           # (which requires a call to the registry for each tag, so can be slow)
           candidate_tags = comparable_tags_from_registry(version)
-          candidate_tags = remove_version_downgrades(candidate_tags, version)
+          non_downgrade_tags = remove_version_downgrades(candidate_tags, version)
+          candidate_tags = non_downgrade_tags if non_downgrade_tags.any?
 
           unless prerelease?(version)
             candidate_tags =

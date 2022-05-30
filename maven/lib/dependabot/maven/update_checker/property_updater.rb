@@ -23,9 +23,8 @@ module Dependabot
 
         def update_possible?
           return false unless target_version
-          return @update_possible if defined?(@update_possible)
 
-          @update_possible =
+          @update_possible ||=
             dependencies_using_property.all? do |dep|
               next false if includes_property_reference?(updated_version(dep))
 

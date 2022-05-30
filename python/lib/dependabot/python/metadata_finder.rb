@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "excon"
-require "uri"
-
 require "dependabot/metadata_finders"
 require "dependabot/metadata_finders/base"
 require "dependabot/shared_helpers"
@@ -109,10 +107,8 @@ module Dependabot
         homepage_url = pypi_listing.dig("info", "home_page")
 
         return unless homepage_url
-        return if [
-          "pypi.org",
-          "pypi.python.org"
-        ].include?(URI(homepage_url).host)
+        return if homepage_url.include?("pypi.python.org")
+        return if homepage_url.include?("pypi.org")
 
         @homepage_response ||=
           begin

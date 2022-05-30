@@ -50,7 +50,7 @@ module Dependabot
       return true if dependency.version&.start_with?(ref)
 
       # Check the specified `ref` isn't actually a branch
-      !local_upload_pack.match?(%r{ refs/heads/#{ref}$})
+      !local_upload_pack.match?("refs/heads/#{ref}")
     end
 
     def pinned_ref_looks_like_version?
@@ -240,7 +240,6 @@ module Dependabot
         when "github" then github_commit_comparison_status(tag, commit)
         when "gitlab" then gitlab_commit_comparison_status(tag, commit)
         when "bitbucket" then bitbucket_commit_comparison_status(tag, commit)
-        when "codecommit" then nil # TODO: get codecommit comparison status
         else raise "Unknown source"
         end
 

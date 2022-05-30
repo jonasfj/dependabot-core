@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-require "json"
-require "uri"
-
 require "dependabot/errors"
+require "json"
 require "dependabot/shared_helpers"
 require "dependabot/composer/update_checker"
 require "dependabot/composer/version"
@@ -310,10 +308,7 @@ module Dependabot
             raise Dependabot::PrivateSourceAuthenticationFailure, source
           elsif error.message.match?(SOURCE_TIMED_OUT_REGEX)
             url = error.message.match(SOURCE_TIMED_OUT_REGEX).named_captures.fetch("url")
-            raise if [
-              "packagist.org",
-              "www.packagist.org"
-            ].include?(URI(url).host)
+            raise if url.include?("packagist.org")
 
             source = url.gsub(%r{/packages.json$}, "")
             raise Dependabot::PrivateSourceTimedOut, source

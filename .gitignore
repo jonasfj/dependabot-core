@@ -27,4 +27,3 @@ vendor
 coverage/
 .ruby-gemset
 .ruby-version
-.tool-versions
